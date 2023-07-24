@@ -1,4 +1,4 @@
-QT       += core gui
+QT       += core gui serialport
 
 
 QMAKE_CXXFLAGS += -Wa,-mbig-obj
