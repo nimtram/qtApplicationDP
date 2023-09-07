@@ -14,11 +14,13 @@ CONFIG += c++17
 SOURCES += \
     main.cpp \
     customplotproject.cpp \
-    qcustomplot.cpp
+    qcustomplot.cpp \
+    serialport.cpp
 
 HEADERS += \
     customplotproject.h \
-    qcustomplot.h
+    qcustomplot.h \
+    serialport.h
 
 FORMS += \
     customplotproject.ui
