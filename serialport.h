@@ -17,20 +17,22 @@ class serialport : public QSerialPort
     Q_OBJECT
 public:
     serialport(QObject *parent = nullptr);
-
+private:
+    QByteArray uartBuffer;
 signals:
     void parse_message(QByteArray);
-    void plot_new_values_x(QVector<double>);
-    void plot_new_values_y(QVector<double>);
-    void plot_new_values_z(QVector<double>);
+    void sig_plot_new_values_x(double);
+    void sig_plot_new_values_y(double);
+    void sig_plot_new_values_z(double);
 
 public slots:
     void threadStarted();
     void threadStopped();
     void slot_read_uart();
     void parse_message_from_serialport(QByteArray);
-    void connectToSerialPort(QString, QString);
-
+    void connectToSerialPort(QString);
+    void disconnectFromSerialPort();
+    void testIt();
 
 };
 
