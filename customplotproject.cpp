@@ -2,6 +2,9 @@
 #include "ui_customplotproject.h"
 #include <QPixmap>
 
+#define LCD_DIGITS_TO_SHOW 11
+
+
 customPlotProject::customPlotProject(QWidget *parent)
     : QMainWindow(parent),
     ui(new Ui::customPlotProject)
@@ -53,6 +56,7 @@ customPlotProject::customPlotProject(QWidget *parent)
     ui->customPlot1->addGraph();
     ui->customPlot1->graph(0)->setScatterStyle(QCPScatterStyle::ssDot);
     ui->customPlot1->graph()->setLineStyle(QCPGraph::lsLine);
+    ui->customPlot1->xAxis->setRange(0, 50);
     ui->customPlot1->yAxis->setLabel("U [V]");
     ui->customPlot1->xAxis->setLabel("Samples");
     ui->customPlot1->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom | QCP::iSelectPlottables);
@@ -60,6 +64,7 @@ customPlotProject::customPlotProject(QWidget *parent)
     ui->customPlot2->addGraph();
     ui->customPlot2->graph(0)->setScatterStyle(QCPScatterStyle::ssDot);
     ui->customPlot2->graph()->setLineStyle(QCPGraph::lsLine);
+    ui->customPlot2->xAxis->setRange(0, 50);
     ui->customPlot2->yAxis->setLabel("U [V]");
     ui->customPlot2->xAxis->setLabel("Samples");
     ui->customPlot2->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom | QCP::iSelectPlottables);
@@ -67,6 +72,7 @@ customPlotProject::customPlotProject(QWidget *parent)
     ui->customPlot3->addGraph();
     ui->customPlot3->graph(0)->setScatterStyle(QCPScatterStyle::ssDot);
     ui->customPlot3->graph()->setLineStyle(QCPGraph::lsLine);
+    ui->customPlot3->xAxis->setRange(0, 50);
     ui->customPlot3->yAxis->setLabel("U [V]");
     ui->customPlot3->xAxis->setLabel("Samples");
     ui->customPlot3->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom | QCP::iSelectPlottables);
@@ -120,10 +126,15 @@ void customPlotProject::plot_new_values_x(double arg_valueToPlot){
     if(rescaleAxesOn == true){
         ui->customPlot1->rescaleAxes();
     }
+
+
+    ui->customPlot1->xAxis->setRange(counterX-50, counterX);
     ui->customPlot1->replot();
     counterX = counterX +1.0;
-    ui->lcdNumberX->setDigitCount(QString::number(valueToPlot).length());
-    ui->lcdNumberX->display(valueToPlot);
+
+    QString formattedNumber = QString::number(valueToPlot, 'f', LCD_DIGITS_TO_SHOW);
+    ui->lcdNumberX->setDigitCount(LCD_DIGITS_TO_SHOW);
+    ui->lcdNumberX->display(formattedNumber);
 }
 
 void customPlotProject::plot_new_values_y(double arg_valueToPlot){
@@ -138,10 +149,12 @@ void customPlotProject::plot_new_values_y(double arg_valueToPlot){
     if(rescaleAxesOn == true){
         ui->customPlot2->rescaleAxes();
     }
+    ui->customPlot2->xAxis->setRange(counterY-50, counterY);
     ui->customPlot2->replot();
     counterY = counterY +1.0;
-    ui->lcdNumberY->setDigitCount(QString::number(valueToPlot).length());
-    ui->lcdNumberY->display(valueToPlot);
+    QString formattedNumber = QString::number(valueToPlot, 'f', LCD_DIGITS_TO_SHOW);
+    ui->lcdNumberY->setDigitCount(LCD_DIGITS_TO_SHOW);
+    ui->lcdNumberY->display(formattedNumber);
 }
 
 void customPlotProject::plot_new_values_z(double arg_valueToPlot){
@@ -155,10 +168,12 @@ void customPlotProject::plot_new_values_z(double arg_valueToPlot){
     if(rescaleAxesOn == true){
         ui->customPlot3->rescaleAxes();
     }
+    ui->customPlot3->xAxis->setRange(counterZ-50, counterZ);
     ui->customPlot3->replot();
     counterZ = counterZ +1.0;
-    ui->lcdNumberZ->setDigitCount(QString::number(valueToPlot).length());
-    ui->lcdNumberZ->display(valueToPlot);
+    QString formattedNumber = QString::number(valueToPlot, 'f', LCD_DIGITS_TO_SHOW);
+    ui->lcdNumberZ->setDigitCount(LCD_DIGITS_TO_SHOW);
+    ui->lcdNumberZ->display(formattedNumber);
 }
 
 customPlotProject::~customPlotProject()
@@ -252,6 +267,9 @@ void customPlotProject::clearPlots(){
     ui->customPlot1->graph(0)->data()->clear();
     ui->customPlot2->graph(0)->data()->clear();
     ui->customPlot3->graph(0)->data()->clear();
+    ui->customPlot1->replot();
+    ui->customPlot2->replot();
+    ui->customPlot3->replot();
     counterX = 0.0;
     counterY = 0.0;
     counterZ = 0.0;
