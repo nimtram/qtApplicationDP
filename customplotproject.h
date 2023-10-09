@@ -10,6 +10,10 @@
 #include <QSerialPortInfo>
 #include <QQueue>
 #include <serialport.h>
+#include <QDialog>
+#include <QLineEdit>
+#include <QFile>
+
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class customPlotProject; }
@@ -44,6 +48,11 @@ private slots:
     void setResolutionY();
     void setResolutionZ();
     void setSPSandRestartADCs();
+    void openSaveToFileDialog();
+    void chooseFileFromSystem();
+    void setFilePathValue(QString);
+    void setLoggingToFile();
+    void stopLoggingToFile();
 
 private:
     QVector<double> createVectorForPlot_x(int);
@@ -78,13 +87,22 @@ private:
     bool resolution10V_Y;
     bool resolution10V_Z;
     QString samplesPerSeconds;
-
+    QString selectedFileName;
+    QLineEdit *filePath;
+    bool loggingToFileEnabled;
+    QTextStream fileOut;
+    QFile file;
+    QDialog *dialogWindow;
 
 public:
     QQueue<QByteArray> queue;
 
+private:
+    bool writeDataToFile(const QString &data);
+
 signals:
     void sig_connectToSerialPort(QString);
+    void sig_setFilePathValue(QString);
 
 
 };

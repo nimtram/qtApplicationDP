@@ -42,6 +42,9 @@ customPlotProject::customPlotProject(QWidget *parent)
     connect(ui->SerialPort1Disconnect, SIGNAL(clicked()), serialPortInstance, SLOT(disconnectFromSerialPort()));
     connect(ui->SerialPort1Refresh, SIGNAL(clicked()), this, SLOT(refreshCOMPorts()));
     connect(ui->button_clearPlots, SIGNAL(clicked()),this, SLOT(clearPlots()));
+    connect(ui->button_logToFile, SIGNAL(clicked()), this, SLOT(openSaveToFileDialog()));
+
+    connect(ui->button_stopLogToFile, SIGNAL(clicked()),this, SLOT(stopLoggingToFile()));
 
 
     // Set UI view
@@ -99,7 +102,13 @@ customPlotProject::customPlotProject(QWidget *parent)
     resolution10V_Y = true;
     resolution10V_Z = true;
     rescaleAxesOn = true;
-
+    loggingToFileEnabled = false;
+    ui->loggingToFileText->setText("Saving to file active");
+    QFont  font;
+    font.setPointSize(16);
+    ui->loggingToFileText->setFont(font);
+    ui->loggingToFileText->setStyleSheet("background-color: green; color: black; padding: 0px;");
+    ui->loggingToFileText->hide();
 
 
     serialPortThread.start();
@@ -135,6 +144,10 @@ void customPlotProject::plot_new_values_x(double arg_valueToPlot){
     QString formattedNumber = QString::number(valueToPlot, 'f', LCD_DIGITS_TO_SHOW);
     ui->lcdNumberX->setDigitCount(LCD_DIGITS_TO_SHOW);
     ui->lcdNumberX->display(formattedNumber);
+
+    if(loggingToFileEnabled == true){
+        writeDataToFile(formattedNumber);
+    }
 }
 
 void customPlotProject::plot_new_values_y(double arg_valueToPlot){
@@ -322,6 +335,95 @@ void customPlotProject::setSPSandRestartADCs()
 
     }else if(samplesPerSeconds == "1000"){
         serialPortInstance->write("4");
+    }
+}
+
+void customPlotProject::openSaveToFileDialog()
+{
+    dialogWindow = new QDialog();
+    dialogWindow->setFixedWidth(640);
+    dialogWindow->setFixedHeight(240);
+    dialogWindow->setWindowModality(Qt::WindowModality::ApplicationModal);
+    dialogWindow->show();
+
+    filePath = new QLineEdit();
+    filePath->setGeometry(10,10,500,30);
+    filePath->setParent(dialogWindow);
+    filePath->show();
+
+
+    QPushButton *threeDotButton = new QPushButton();
+    threeDotButton->setGeometry(520, 20, 40, 20); // Set the button's position and size
+    threeDotButton->setText("...");
+    threeDotButton->setParent(dialogWindow);
+    threeDotButton->show();
+
+    QPushButton *button_startLogging = new QPushButton();
+    button_startLogging->setGeometry(540, 190, 80, 40); // Set the button's position and size
+    button_startLogging->setText("Start logging");
+    button_startLogging->setParent(dialogWindow);
+    button_startLogging->show();
+
+//    savingLabel = new QLabel("Saving in progress!");
+//    savingLabel->setGeometry(10, 50, 200, 50);
+//    QFont  font;
+//    font.setPointSize(16);
+//    savingLabel->setFont(font);
+//    savingLabel->setStyleSheet("background-color: green; color: black; padding: 5px;");
+//    savingLabel->setParent(dialogWindow);
+
+    connect(threeDotButton, SIGNAL(clicked()), this, SLOT(chooseFileFromSystem()));
+    connect(this, SIGNAL(sig_setFilePathValue(QString)),this, SLOT(setFilePathValue(QString)));
+    connect(button_startLogging, SIGNAL(clicked()),this, SLOT(setLoggingToFile()));
+}
+
+void customPlotProject::chooseFileFromSystem()
+{
+    selectedFileName = QFileDialog::getSaveFileName(this, "Save File", QDir::homePath(), "Text Files (*.txt);;All Files (*)");
+    emit sig_setFilePathValue(selectedFileName);
+}
+
+void customPlotProject::setFilePathValue(QString path)
+{
+    filePath->setText(path);
+}
+
+void customPlotProject::setLoggingToFile()
+{
+//    file.setFileName(filePath);
+//    if (file.open(QIODevice::WriteOnly | QIODevice::Text)){
+//        fileOut.setDevice(&file);
+
+//    }
+    file.setFileName(selectedFileName);
+    if (file.open(QIODevice::WriteOnly | QIODevice::Text)){
+        fileOut.setDevice(&file);
+        loggingToFileEnabled = true;
+        ui->loggingToFileText->show();
+
+    }else{
+        loggingToFileEnabled = false;
+    }
+    dialogWindow->close();
+}
+
+void customPlotProject::stopLoggingToFile()
+{
+    loggingToFileEnabled = false;
+    file.close();
+    ui->loggingToFileText->hide();
+}
+
+bool customPlotProject::writeDataToFile(const QString &data){
+    if (file.isOpen() && fileOut.status() == QTextStream::Ok)
+    {
+        // Write data to the file
+        fileOut << data << Qt::endl;
+        return true;
+    }
+    else
+    {
+        return false;
     }
 }
 
