@@ -94,7 +94,7 @@ customPlotProject::customPlotProject(QWidget *parent)
     ui->resolution_10V_Y->setChecked(true);
     ui->resolution_10V_Z->setChecked(true);
 
-
+    valuesStoredToFile = 0;
     counterX = 0;
     counterY = 0;
     counterZ = 0;
@@ -103,13 +103,13 @@ customPlotProject::customPlotProject(QWidget *parent)
     resolution10V_Z = true;
     rescaleAxesOn = true;
     loggingToFileEnabled = false;
-    ui->loggingToFileText->setText("Saving to file active");
+    ui->loggingToFileText->setText("Saving to file active: ");
     QFont  font;
     font.setPointSize(16);
     ui->loggingToFileText->setFont(font);
     ui->loggingToFileText->setStyleSheet("background-color: green; color: black; padding: 0px;");
     ui->loggingToFileText->hide();
-
+    samplesPerSeconds = ui->list_samplesPerSecond->currentText();
 
     serialPortThread.start();
     qDebug() << "started";
@@ -146,7 +146,11 @@ void customPlotProject::plot_new_values_x(double arg_valueToPlot){
     ui->lcdNumberX->display(formattedNumber);
 
     if(loggingToFileEnabled == true){
-        writeDataToFile(formattedNumber);
+        bool resWriteData = writeDataToFile((formattedNumber + " "));
+        if(resWriteData == false){
+            QMessageBox::critical(nullptr, "Error", "An error has occurred while writing to a file!");
+            stopLoggingToFile();
+        }
     }
 }
 
@@ -168,6 +172,14 @@ void customPlotProject::plot_new_values_y(double arg_valueToPlot){
     QString formattedNumber = QString::number(valueToPlot, 'f', LCD_DIGITS_TO_SHOW);
     ui->lcdNumberY->setDigitCount(LCD_DIGITS_TO_SHOW);
     ui->lcdNumberY->display(formattedNumber);
+
+    if(loggingToFileEnabled == true){
+        bool resWriteData = writeDataToFile((formattedNumber + " "));
+        if(resWriteData == false){
+            QMessageBox::critical(nullptr, "Error", "An error has occurred while writing to a file!");
+            stopLoggingToFile();
+        }
+    }
 }
 
 void customPlotProject::plot_new_values_z(double arg_valueToPlot){
@@ -187,6 +199,18 @@ void customPlotProject::plot_new_values_z(double arg_valueToPlot){
     QString formattedNumber = QString::number(valueToPlot, 'f', LCD_DIGITS_TO_SHOW);
     ui->lcdNumberZ->setDigitCount(LCD_DIGITS_TO_SHOW);
     ui->lcdNumberZ->display(formattedNumber);
+
+    if(loggingToFileEnabled == true){
+        bool resWriteData = writeDataToFile((formattedNumber + "\n"));
+        if(resWriteData == false){
+            QMessageBox::critical(nullptr, "Error", "An error has occurred while writing to a file!");
+            stopLoggingToFile();
+        }
+        valuesStoredToFile++;
+        if ((valuesStoredToFile % 10) ==0){
+            ui->loggingToFileText->setText("Saving to file active: " + QString::number(valuesStoredToFile));
+        }
+    }
 }
 
 customPlotProject::~customPlotProject()
@@ -390,11 +414,7 @@ void customPlotProject::setFilePathValue(QString path)
 
 void customPlotProject::setLoggingToFile()
 {
-//    file.setFileName(filePath);
-//    if (file.open(QIODevice::WriteOnly | QIODevice::Text)){
-//        fileOut.setDevice(&file);
 
-//    }
     file.setFileName(selectedFileName);
     if (file.open(QIODevice::WriteOnly | QIODevice::Text)){
         fileOut.setDevice(&file);
@@ -404,6 +424,9 @@ void customPlotProject::setLoggingToFile()
     }else{
         loggingToFileEnabled = false;
     }
+    QString fileHeader = createHeaderForFile();
+    writeDataToFile(fileHeader);
+    valuesStoredToFile = 0;
     dialogWindow->close();
 }
 
@@ -418,7 +441,7 @@ bool customPlotProject::writeDataToFile(const QString &data){
     if (file.isOpen() && fileOut.status() == QTextStream::Ok)
     {
         // Write data to the file
-        fileOut << data << Qt::endl;
+        fileOut << data;
         return true;
     }
     else
@@ -427,3 +450,29 @@ bool customPlotProject::writeDataToFile(const QString &data){
     }
 }
 
+QString customPlotProject::createHeaderForFile(){
+    const QString infoString = "Setting of x,y,z data: ";
+    QString spsString ="SPS " + samplesPerSeconds + ", ";
+    QString resolutionString_x;
+    QString resolutionString_y;
+    QString resolutionString_z;
+    if (resolution10V_X == true){
+        resolutionString_x ="resolution x: 10V, ";
+    }else{
+        resolutionString_x ="resolution x: 0.5V, ";
+    }
+    if (resolution10V_Y == true){
+        resolutionString_y ="resolution y: 10V, ";
+    }else{
+        resolutionString_y ="resolution y: 0.5V, ";
+    }
+    if (resolution10V_Z == true){
+        resolutionString_z ="resolution z: 10V";
+    }else{
+        resolutionString_z ="resolution z: 0.5V";
+    }
+    QString endString ="\n";
+
+    QString outputString = infoString + spsString + resolutionString_x + resolutionString_y + resolutionString_z + endString;
+    return outputString;
+}

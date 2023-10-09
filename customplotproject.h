@@ -93,12 +93,14 @@ private:
     QTextStream fileOut;
     QFile file;
     QDialog *dialogWindow;
+    quint32 valuesStoredToFile;
 
 public:
     QQueue<QByteArray> queue;
 
 private:
     bool writeDataToFile(const QString &data);
+    QString createHeaderForFile(void);
 
 signals:
     void sig_connectToSerialPort(QString);
