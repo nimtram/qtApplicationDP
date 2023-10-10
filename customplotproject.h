@@ -64,6 +64,8 @@ private:
 
     QSerialPortInfo info;
     Ui::customPlotProject *ui;
+    bool updateValues;
+    int spsCounter;
     int counterX;
     int counterY;
     int counterZ;

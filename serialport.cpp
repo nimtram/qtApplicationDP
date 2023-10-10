@@ -8,7 +8,7 @@ serialport::serialport(QObject* parent) : QSerialPort(parent)
 
 void serialport::threadStarted()
 {
-    qDebug()<< "thread started";
+    //qDebug()<< "thread started";
     connect(this, SIGNAL(readyRead()), this, SLOT(slot_read_uart()));
     connect(this, SIGNAL(parse_message(QByteArray)),this,SLOT(parse_message_from_serialport(QByteArray)));
 }
