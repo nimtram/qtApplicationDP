@@ -66,6 +66,7 @@ private:
     Ui::customPlotProject *ui;
     bool updateValues;
     int spsCounter;
+    QVector<int> spsDivideValues;
     int counterX;
     int counterY;
     int counterZ;
@@ -96,6 +97,7 @@ private:
     QFile file;
     QDialog *dialogWindow;
     quint32 valuesStoredToFile;
+    uint8_t samplesDivider;
 
 public:
     QQueue<QByteArray> queue;
@@ -103,6 +105,7 @@ public:
 private:
     bool writeDataToFile(const QString &data);
     QString createHeaderForFile(void);
+    void setSpsDivider(void);
 
 signals:
     void sig_connectToSerialPort(QString);

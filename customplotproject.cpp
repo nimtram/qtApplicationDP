@@ -113,6 +113,8 @@ customPlotProject::customPlotProject(QWidget *parent)
     ui->loggingToFileText->hide();
     samplesPerSeconds = ui->list_samplesPerSecond->currentText();
 
+    samplesDivider = 1;
+
     serialPortThread.start();
     //qDebug() << "started";
 }
@@ -136,14 +138,14 @@ void customPlotProject::plot_new_values_x(double arg_valueToPlot){
 
 
     QString formattedNumber = QString::number(valueToPlot, 'f', LCD_DIGITS_TO_SHOW);
-    if(samplesPerSeconds =="1000"){
-        spsCounter++;
-        if((spsCounter%200)==0){
+
+    if (samplesPerSeconds != "5"){
+        if (spsCounter % samplesDivider ==0){
             updateValues = true;
         }
     }
 
-    if(updateValues == true){
+    if(updateValues == true || samplesPerSeconds == "5"){
         ui->customPlot1->graph(0)->addData(counterX, valueToPlot);
         if(rescaleAxesOn == true){
             ui->customPlot1->rescaleAxes();
@@ -161,11 +163,10 @@ void customPlotProject::plot_new_values_x(double arg_valueToPlot){
                 stopLoggingToFile();
             }
         }
-    }
-
-    if(samplesPerSeconds =="1000"){
         updateValues = false;
     }
+
+
 
 
 
@@ -364,19 +365,23 @@ void customPlotProject::setSPSandRestartADCs()
     samplesPerSeconds = ui->list_samplesPerSecond->currentText();
     if(samplesPerSeconds == "5"){
         serialPortInstance->write("0");
+        samplesDivider = 1;
 
     }else if (samplesPerSeconds == "20"){
         serialPortInstance->write("1");
+        samplesDivider = 4;
 
     }else if(samplesPerSeconds == "100"){
         serialPortInstance->write("2");
+        samplesDivider = 20;
 
     }else if(samplesPerSeconds == "500"){
         serialPortInstance->write("3");
+        samplesDivider = 100;
 
     }else if(samplesPerSeconds == "1000"){
         serialPortInstance->write("4");
-        updateValues = false;
+        samplesDivider = 200;
     }
 }
 
@@ -494,3 +499,4 @@ QString customPlotProject::createHeaderForFile(){
     QString outputString = infoString + spsString + resolutionString_x + resolutionString_y + resolutionString_z + endString;
     return outputString;
 }
+
