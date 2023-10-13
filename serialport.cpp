@@ -85,7 +85,7 @@ void serialport::parse_message_from_serialport(QByteArray byteArray){
 void serialport::connectToSerialPort(QString portName){
 
     setPortName(portName);
-    setBaudRate(QSerialPort::Baud115200);
+    setBaudRate(3000000);
     setDataBits(QSerialPort::Data8);
     setParity(QSerialPort::NoParity);
     setStopBits(QSerialPort::OneStop);

@@ -50,7 +50,6 @@ private slots:
     void setSPSandRestartADCs();
     void openSaveToFileDialog();
     void chooseFileFromSystem();
-    void setFilePathValue(QString);
     void setLoggingToFile();
     void stopLoggingToFile();
 
@@ -70,6 +69,7 @@ private:
     int counterX;
     int counterY;
     int counterZ;
+    int counterHighSPS;
     bool rescaleAxesOn;
 
     QVector<double> allMeasuredData_X;
@@ -98,6 +98,7 @@ private:
     QDialog *dialogWindow;
     quint32 valuesStoredToFile;
     uint8_t samplesDivider;
+    bool skipDueToDelay;
 
 public:
     QQueue<QByteArray> queue;
@@ -107,9 +108,9 @@ private:
     QString createHeaderForFile(void);
     void setSpsDivider(void);
 
+    void delay();
 signals:
     void sig_connectToSerialPort(QString);
-    void sig_setFilePathValue(QString);
 
 
 };

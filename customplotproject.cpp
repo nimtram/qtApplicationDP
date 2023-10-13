@@ -114,8 +114,12 @@ customPlotProject::customPlotProject(QWidget *parent)
     samplesPerSeconds = ui->list_samplesPerSecond->currentText();
 
     samplesDivider = 1;
+    samplesPerSeconds = "5";
+    counterHighSPS = 0;
+    skipDueToDelay = false;
 
     serialPortThread.start();
+
     //qDebug() << "started";
 }
 
@@ -128,24 +132,22 @@ void customPlotProject::buttonConnectPressed(){
 }
 
 void customPlotProject::plot_new_values_x(double arg_valueToPlot){
+    if (skipDueToDelay == true) return;
     double valueToPlot;
     if(resolution10V_X == true){
         valueToPlot = (20* arg_valueToPlot / (pow(2,32))) - 10 ;
     }else{
         valueToPlot = (arg_valueToPlot / (pow(2,32))) - 0.5 ;
     }
-
-
-
     QString formattedNumber = QString::number(valueToPlot, 'f', LCD_DIGITS_TO_SHOW);
-
-    if (samplesPerSeconds != "5"){
+    if (samplesPerSeconds != "5" ){
         if (spsCounter % samplesDivider ==0){
             updateValues = true;
         }
+        spsCounter++;
     }
 
-    if(updateValues == true || samplesPerSeconds == "5"){
+    if(samplesPerSeconds == "5"){
         ui->customPlot1->graph(0)->addData(counterX, valueToPlot);
         if(rescaleAxesOn == true){
             ui->customPlot1->rescaleAxes();
@@ -156,79 +158,108 @@ void customPlotProject::plot_new_values_x(double arg_valueToPlot){
         ui->lcdNumberX->setDigitCount(LCD_DIGITS_TO_SHOW);
         ui->lcdNumberX->display(formattedNumber);
 
-        if(loggingToFileEnabled == true){
-            bool resWriteData = writeDataToFile((formattedNumber + " "));
-            if(resWriteData == false){
-                QMessageBox::critical(nullptr, "Error", "An error has occurred while writing to a file!");
-                stopLoggingToFile();
-            }
+    }else if(updateValues == true && samplesPerSeconds != "5"){
+        ui->customPlot1->graph(0)->addData(counterHighSPS, valueToPlot);
+        if(rescaleAxesOn == true){
+            ui->customPlot1->rescaleAxes();
         }
-        updateValues = false;
+        ui->customPlot1->xAxis->setRange(counterHighSPS-50, counterHighSPS);
+        ui->customPlot1->replot();
+        ui->lcdNumberX->setDigitCount(LCD_DIGITS_TO_SHOW);
+        ui->lcdNumberX->display(formattedNumber);
     }
 
-
-
-
-
+    if(loggingToFileEnabled == true){
+        bool resWriteData = writeDataToFile((formattedNumber + " "));
+        if(resWriteData == false){
+            QMessageBox::critical(nullptr, "Error", "An error has occurred while writing to a file!");
+            stopLoggingToFile();
+        }
+    }
 }
 
 void customPlotProject::plot_new_values_y(double arg_valueToPlot){
-//    double valueToPlot;
-//    if(resolution10V_Y == true){
-//        valueToPlot = (20* arg_valueToPlot / (pow(2,32))) - 10 ;
-//    }else{
-//        valueToPlot = (arg_valueToPlot / (pow(2,32))) - 0.5 ;
-//    }
+    if (skipDueToDelay == true) return;
+    double valueToPlot;
+    if(resolution10V_Y == true){
+        valueToPlot = (20* arg_valueToPlot / (pow(2,32))) - 10 ;
+    }else{
+        valueToPlot = (arg_valueToPlot / (pow(2,32))) - 0.5 ;
+    }
+    QString formattedNumber = QString::number(valueToPlot, 'f', LCD_DIGITS_TO_SHOW);
 
-//    ui->customPlot2->graph(0)->addData(counterY, valueToPlot);
-//    if(rescaleAxesOn == true){
-//        ui->customPlot2->rescaleAxes();
-//    }
-//    ui->customPlot2->xAxis->setRange(counterY-50, counterY);
-//    ui->customPlot2->replot();
-//    counterY = counterY +1.0;
-//    QString formattedNumber = QString::number(valueToPlot, 'f', LCD_DIGITS_TO_SHOW);
-//    ui->lcdNumberY->setDigitCount(LCD_DIGITS_TO_SHOW);
-//    ui->lcdNumberY->display(formattedNumber);
+    if(samplesPerSeconds == "5"){
+        ui->customPlot2->graph(0)->addData(counterY, valueToPlot);
+        if(rescaleAxesOn == true){
+            ui->customPlot2->rescaleAxes();
+        }
+        ui->customPlot2->xAxis->setRange(counterY-50, counterY);
+        ui->customPlot2->replot();
+        counterY = counterY +1.0;
+        ui->lcdNumberY->setDigitCount(LCD_DIGITS_TO_SHOW);
+        ui->lcdNumberY->display(formattedNumber);
 
-//    if(loggingToFileEnabled == true){
-//        bool resWriteData = writeDataToFile((formattedNumber + " "));
-//        if(resWriteData == false){
-//            QMessageBox::critical(nullptr, "Error", "An error has occurred while writing to a file!");
-//            stopLoggingToFile();
-//        }
-//    }
+    }else if(updateValues == true && samplesPerSeconds != "5"){
+        ui->customPlot2->graph(0)->addData(counterHighSPS, valueToPlot);
+        if(rescaleAxesOn == true){
+            ui->customPlot2->rescaleAxes();
+        }
+        ui->customPlot2->xAxis->setRange(counterHighSPS-50, counterHighSPS);
+        ui->customPlot2->replot();
+        ui->lcdNumberY->setDigitCount(LCD_DIGITS_TO_SHOW);
+        ui->lcdNumberY->display(formattedNumber);
+    }
+
+    if(loggingToFileEnabled == true){
+        bool resWriteData = writeDataToFile((formattedNumber + " "));
+        if(resWriteData == false){
+            QMessageBox::critical(nullptr, "Error", "An error has occurred while writing to a file!");
+            stopLoggingToFile();
+        }
+    }
 }
 
 void customPlotProject::plot_new_values_z(double arg_valueToPlot){
-//    double valueToPlot;
-//    if(resolution10V_Z == true){
-//        valueToPlot = (20* arg_valueToPlot / (pow(2,32))) - 10 ;
-//    }else{
-//        valueToPlot = (arg_valueToPlot / (pow(2,32))) - 0.5 ;
-//    }
-//    ui->customPlot3->graph(0)->addData(counterZ, valueToPlot);
-//    if(rescaleAxesOn == true){
-//        ui->customPlot3->rescaleAxes();
-//    }
-//    ui->customPlot3->xAxis->setRange(counterZ-50, counterZ);
-//    ui->customPlot3->replot();
-//    counterZ = counterZ +1.0;
-//    QString formattedNumber = QString::number(valueToPlot, 'f', LCD_DIGITS_TO_SHOW);
-//    ui->lcdNumberZ->setDigitCount(LCD_DIGITS_TO_SHOW);
-//    ui->lcdNumberZ->display(formattedNumber);
+    if (skipDueToDelay == true) return;
+    double valueToPlot;
+    if(resolution10V_Z == true){
+        valueToPlot = (20* arg_valueToPlot / (pow(2,32))) - 10 ;
+    }else{
+        valueToPlot = (arg_valueToPlot / (pow(2,32))) - 0.5 ;
+    }
+    QString formattedNumber = QString::number(valueToPlot, 'f', LCD_DIGITS_TO_SHOW);
 
-//    if(loggingToFileEnabled == true){
-//        bool resWriteData = writeDataToFile((formattedNumber + "\n"));
-//        if(resWriteData == false){
-//            QMessageBox::critical(nullptr, "Error", "An error has occurred while writing to a file!");
-//            stopLoggingToFile();
-//        }
-//        valuesStoredToFile++;
-//        if ((valuesStoredToFile % 10) ==0){
-//            ui->loggingToFileText->setText("Saving to file active: " + QString::number(valuesStoredToFile));
-//        }
-//    }
+    if(samplesPerSeconds == "5"){
+        ui->customPlot3->graph(0)->addData(counterZ, valueToPlot);
+        if(rescaleAxesOn == true){
+            ui->customPlot3->rescaleAxes();
+        }
+        ui->customPlot3->xAxis->setRange(counterZ-50, counterZ);
+        ui->customPlot3->replot();
+        counterZ = counterZ +1.0;
+        ui->lcdNumberZ->setDigitCount(LCD_DIGITS_TO_SHOW);
+        ui->lcdNumberZ->display(formattedNumber);
+
+    }else if(updateValues == true && samplesPerSeconds != "5"){
+        ui->customPlot3->graph(0)->addData(counterHighSPS, valueToPlot);
+        if(rescaleAxesOn == true){
+            ui->customPlot3->rescaleAxes();
+        }
+        ui->customPlot3->xAxis->setRange(counterHighSPS-50, counterHighSPS);
+        ui->customPlot3->replot();
+        ui->lcdNumberZ->setDigitCount(LCD_DIGITS_TO_SHOW);
+        ui->lcdNumberZ->display(formattedNumber);
+        updateValues = false;
+        counterHighSPS++;
+    }
+
+    if(loggingToFileEnabled == true){
+        bool resWriteData = writeDataToFile((formattedNumber + "\n"));
+        if(resWriteData == false){
+            QMessageBox::critical(nullptr, "Error", "An error has occurred while writing to a file!");
+            stopLoggingToFile();
+        }
+    }
 }
 
 customPlotProject::~customPlotProject()
@@ -328,6 +359,7 @@ void customPlotProject::clearPlots(){
     counterX = 0.0;
     counterY = 0.0;
     counterZ = 0.0;
+    counterHighSPS = 0;
 }
 
 void customPlotProject::setResolutionX()
@@ -383,6 +415,10 @@ void customPlotProject::setSPSandRestartADCs()
         serialPortInstance->write("4");
         samplesDivider = 200;
     }
+    skipDueToDelay = true;
+    clearPlots();
+    delay();
+    skipDueToDelay = false;
 }
 
 void customPlotProject::openSaveToFileDialog()
@@ -420,24 +456,18 @@ void customPlotProject::openSaveToFileDialog()
 //    savingLabel->setParent(dialogWindow);
 
     connect(threeDotButton, SIGNAL(clicked()), this, SLOT(chooseFileFromSystem()));
-    connect(this, SIGNAL(sig_setFilePathValue(QString)),this, SLOT(setFilePathValue(QString)));
     connect(button_startLogging, SIGNAL(clicked()),this, SLOT(setLoggingToFile()));
 }
 
 void customPlotProject::chooseFileFromSystem()
 {
     selectedFileName = QFileDialog::getSaveFileName(this, "Save File", QDir::homePath(), "Text Files (*.txt);;All Files (*)");
-    emit sig_setFilePathValue(selectedFileName);
-}
-
-void customPlotProject::setFilePathValue(QString path)
-{
-    filePath->setText(path);
+    filePath->setText(selectedFileName);
 }
 
 void customPlotProject::setLoggingToFile()
 {
-
+    selectedFileName = filePath->text();
     file.setFileName(selectedFileName);
     if (file.open(QIODevice::WriteOnly | QIODevice::Text)){
         fileOut.setDevice(&file);
@@ -500,3 +530,9 @@ QString customPlotProject::createHeaderForFile(){
     return outputString;
 }
 
+void customPlotProject::delay()
+{
+    QTime dieTime= QTime::currentTime().addSecs(1);
+    while (QTime::currentTime() < dieTime)
+        QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
+}
