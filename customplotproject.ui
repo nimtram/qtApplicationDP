@@ -24,19 +24,19 @@
     <property name="geometry">
      <rect>
       <x>20</x>
-      <y>200</y>
-      <width>861</width>
-      <height>181</height>
+      <y>130</y>
+      <width>860</width>
+      <height>200</height>
      </rect>
     </property>
    </widget>
    <widget class="QLabel" name="label">
     <property name="geometry">
      <rect>
-      <x>20</x>
-      <y>20</y>
-      <width>91</width>
-      <height>21</height>
+      <x>30</x>
+      <y>10</y>
+      <width>90</width>
+      <height>30</height>
      </rect>
     </property>
     <property name="text">
@@ -70,9 +70,9 @@
     <property name="geometry">
      <rect>
       <x>20</x>
-      <y>400</y>
-      <width>861</width>
-      <height>181</height>
+      <y>350</y>
+      <width>860</width>
+      <height>200</height>
      </rect>
     </property>
    </widget>
@@ -80,59 +80,46 @@
     <property name="geometry">
      <rect>
       <x>20</x>
-      <y>600</y>
-      <width>861</width>
-      <height>181</height>
+      <y>570</y>
+      <width>860</width>
+      <height>200</height>
      </rect>
     </property>
    </widget>
    <widget class="QComboBox" name="list_samplesPerSecond">
     <property name="geometry">
      <rect>
-      <x>380</x>
+      <x>310</x>
       <y>50</y>
-      <width>191</width>
-      <height>31</height>
+      <width>185</width>
+      <height>30</height>
      </rect>
     </property>
    </widget>
    <widget class="QPushButton" name="button_setSPS">
     <property name="geometry">
      <rect>
-      <x>380</x>
+      <x>310</x>
       <y>90</y>
-      <width>191</width>
-      <height>31</height>
+      <width>185</width>
+      <height>30</height>
      </rect>
     </property>
     <property name="text">
      <string>Set SPS and reset all ADCs</string>
     </property>
    </widget>
-   <widget class="QLabel" name="pictureLabel">
+   <widget class="QPushButton" name="button_openFile">
     <property name="geometry">
      <rect>
-      <x>870</x>
-      <y>30</y>
-      <width>371</width>
-      <height>41</height>
+      <x>550</x>
+      <y>50</y>
+      <width>102</width>
+      <height>30</height>
      </rect>
     </property>
     <property name="text">
-     <string/>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="button_logToFile">
-    <property name="geometry">
-     <rect>
-      <x>450</x>
-      <y>160</y>
-      <width>141</width>
-      <height>31</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Logging to file</string>
+     <string>Open file</string>
     </property>
    </widget>
    <widget class="QPushButton" name="SerialPort1Refresh">
@@ -164,10 +151,10 @@
    <widget class="QPushButton" name="button_clearPlots">
     <property name="geometry">
      <rect>
-      <x>780</x>
-      <y>160</y>
-      <width>101</width>
-      <height>29</height>
+      <x>840</x>
+      <y>90</y>
+      <width>93</width>
+      <height>30</height>
      </rect>
     </property>
     <property name="text">
@@ -177,71 +164,63 @@
    <widget class="QLCDNumber" name="lcdNumberY">
     <property name="geometry">
      <rect>
-      <x>900</x>
-      <y>400</y>
-      <width>471</width>
-      <height>121</height>
+      <x>890</x>
+      <y>350</y>
+      <width>500</width>
+      <height>130</height>
      </rect>
     </property>
    </widget>
    <widget class="QLCDNumber" name="lcdNumberZ">
     <property name="geometry">
      <rect>
-      <x>900</x>
-      <y>600</y>
-      <width>471</width>
-      <height>121</height>
+      <x>890</x>
+      <y>570</y>
+      <width>500</width>
+      <height>130</height>
      </rect>
     </property>
    </widget>
    <widget class="QLCDNumber" name="lcdNumberX">
     <property name="geometry">
      <rect>
-      <x>900</x>
-      <y>200</y>
-      <width>471</width>
-      <height>121</height>
+      <x>890</x>
+      <y>130</y>
+      <width>500</width>
+      <height>130</height>
      </rect>
     </property>
    </widget>
    <widget class="QLabel" name="label_2">
     <property name="geometry">
      <rect>
-      <x>380</x>
-      <y>20</y>
-      <width>191</width>
-      <height>21</height>
+      <x>310</x>
+      <y>10</y>
+      <width>190</width>
+      <height>30</height>
      </rect>
     </property>
     <property name="text">
      <string>Samples per second</string>
     </property>
    </widget>
-   <widget class="QPushButton" name="testButton">
-    <property name="geometry">
-     <rect>
-      <x>1160</x>
-      <y>150</y>
-      <width>93</width>
-      <height>29</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>test button</string>
-    </property>
-   </widget>
    <widget class="QWidget" name="verticalLayoutWidget">
     <property name="geometry">
      <rect>
-      <x>900</x>
-      <y>320</y>
+      <x>890</x>
+      <y>270</y>
       <width>161</width>
-      <height>61</height>
+      <height>65</height>
      </rect>
     </property>
     <layout class="QVBoxLayout" name="verticalLayout">
      <item>
       <widget class="QRadioButton" name="resolution_10V_X">
+       <property name="font">
+        <font>
+         <pointsize>11</pointsize>
+        </font>
+       </property>
        <property name="text">
         <string>10V resolution</string>
        </property>
@@ -249,6 +228,11 @@
      </item>
      <item>
       <widget class="QRadioButton" name="resolution_05V_X">
+       <property name="font">
+        <font>
+         <pointsize>11</pointsize>
+        </font>
+       </property>
        <property name="text">
         <string>0.5V resolution</string>
        </property>
@@ -260,14 +244,19 @@
     <property name="geometry">
      <rect>
       <x>890</x>
-      <y>520</y>
+      <y>490</y>
       <width>151</width>
-      <height>61</height>
+      <height>65</height>
      </rect>
     </property>
     <layout class="QVBoxLayout" name="verticalLayout2">
      <item>
       <widget class="QRadioButton" name="resolution_10V_Y">
+       <property name="font">
+        <font>
+         <pointsize>11</pointsize>
+        </font>
+       </property>
        <property name="text">
         <string>10V resolution</string>
        </property>
@@ -275,6 +264,11 @@
      </item>
      <item>
       <widget class="QRadioButton" name="resolution_05V_Y">
+       <property name="font">
+        <font>
+         <pointsize>11</pointsize>
+        </font>
+       </property>
        <property name="text">
         <string>0.5V resolution</string>
        </property>
@@ -286,14 +280,19 @@
     <property name="geometry">
      <rect>
       <x>890</x>
-      <y>720</y>
+      <y>700</y>
       <width>151</width>
-      <height>61</height>
+      <height>65</height>
      </rect>
     </property>
     <layout class="QVBoxLayout" name="verticalLayout3">
      <item>
       <widget class="QRadioButton" name="resolution_10V_Z">
+       <property name="font">
+        <font>
+         <pointsize>11</pointsize>
+        </font>
+       </property>
        <property name="text">
         <string>10V resolution</string>
        </property>
@@ -301,6 +300,11 @@
      </item>
      <item>
       <widget class="QRadioButton" name="resolution_05V_Z">
+       <property name="font">
+        <font>
+         <pointsize>11</pointsize>
+        </font>
+       </property>
        <property name="text">
         <string>0.5V resolution</string>
        </property>
@@ -308,30 +312,69 @@
      </item>
     </layout>
    </widget>
-   <widget class="QPushButton" name="button_stopLogToFile">
+   <widget class="QPushButton" name="button_closeFile">
     <property name="geometry">
      <rect>
-      <x>610</x>
-      <y>160</y>
-      <width>141</width>
-      <height>31</height>
+      <x>550</x>
+      <y>90</y>
+      <width>102</width>
+      <height>30</height>
      </rect>
     </property>
     <property name="text">
-     <string>Stop logging to file</string>
+     <string>Close file</string>
     </property>
    </widget>
    <widget class="QLabel" name="loggingToFileText">
     <property name="geometry">
      <rect>
-      <x>610</x>
-      <y>120</y>
+      <x>550</x>
+      <y>10</y>
       <width>271</width>
       <height>31</height>
      </rect>
     </property>
     <property name="text">
      <string>Logging to file text</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_maglab">
+    <property name="geometry">
+     <rect>
+      <x>1010</x>
+      <y>30</y>
+      <width>301</width>
+      <height>61</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="button_logToFile">
+    <property name="geometry">
+     <rect>
+      <x>670</x>
+      <y>50</y>
+      <width>151</width>
+      <height>30</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Start logging to file</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="button_stopLogToFile">
+    <property name="geometry">
+     <rect>
+      <x>670</x>
+      <y>90</y>
+      <width>151</width>
+      <height>30</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Stop logging to file</string>
     </property>
    </widget>
   </widget>
@@ -341,7 +384,7 @@
      <x>0</x>
      <y>0</y>
      <width>1397</width>
-     <height>22</height>
+     <height>26</height>
     </rect>
    </property>
   </widget>

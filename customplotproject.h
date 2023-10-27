@@ -50,7 +50,11 @@ private slots:
     void setSPSandRestartADCs();
     void openSaveToFileDialog();
     void chooseFileFromSystem();
-    void setLoggingToFile();
+    void openFileForLogging();
+    void closeFileForLogging();
+    void serialPortConnected();
+    void serialPortDisconnected();
+    void startLoggingToFile();
     void stopLoggingToFile();
 
 private:
@@ -72,9 +76,9 @@ private:
     int counterHighSPS;
     bool rescaleAxesOn;
 
-    QVector<double> allMeasuredData_X;
-    QVector<double> allMeasuredData_Y;
-    QVector<double> allMeasuredData_Z;
+    QVector<double> lastMeasuredDataX;
+    QVector<double> lastMeasuredDataY;
+    QVector<double> lastMeasuredDataZ;
 
     QSerialPort* serialComPort;
     QSerialPort* COMPORT_2;
@@ -93,6 +97,7 @@ private:
     QString selectedFileName;
     QLineEdit *filePath;
     bool loggingToFileEnabled;
+    bool fileOpened;
     QTextStream fileOut;
     QFile file;
     QDialog *dialogWindow;

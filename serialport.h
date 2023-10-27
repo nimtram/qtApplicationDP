@@ -24,6 +24,8 @@ signals:
     void sig_plot_new_values_x(double);
     void sig_plot_new_values_y(double);
     void sig_plot_new_values_z(double);
+    void sig_serialPortConnected();
+    void sig_serialPortDisconnected();
 
 public slots:
     void threadStarted();
@@ -32,7 +34,6 @@ public slots:
     void parse_message_from_serialport(QByteArray);
     void connectToSerialPort(QString);
     void disconnectFromSerialPort();
-    void testIt();
 
 };
 

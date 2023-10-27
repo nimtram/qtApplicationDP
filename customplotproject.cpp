@@ -10,9 +10,17 @@ customPlotProject::customPlotProject(QWidget *parent)
     ui(new Ui::customPlotProject)
 {
     ui->setupUi(this);
-    this->setWindowTitle("testing name of window");
-    QPixmap pix("C:/Documents/_vysoka/DP/Qt/customPlotProject/mglb_logo.png");
-    ui->pictureLabel->setPixmap(pix);
+    this->setWindowTitle("Three channel ADC board");
+//    QPixmap pix("C:/Documents/_vysoka/DP/Qt/customPlotProject/mglb_logo.png");
+//    ui->pictureLabel->setPixmap(pix);
+
+    QPixmap img ("C:/Documents/_vysoka/DP/Qt/customPlotProject/mglb_logo.png");
+    QPixmap scaledImg = img.scaled(400, 800);
+    ui->label_maglab->setPixmap(scaledImg);
+//    QVBoxLayout *layout = new QVBoxLayout();
+//    layout->addWidget(label_maglab);
+//    setLayout(layout);
+
 
 
 
@@ -20,6 +28,8 @@ customPlotProject::customPlotProject(QWidget *parent)
     serialPortInstance->moveToThread(&serialPortThread);
     connect(&serialPortThread, SIGNAL(started()), serialPortInstance, SLOT(threadStarted()));
     connect(&serialPortThread, SIGNAL(finished()), serialPortInstance, SLOT(threadStopped()));
+    connect(serialPortInstance, SIGNAL(sig_serialPortConnected()),this, SLOT(serialPortConnected()));
+    connect(serialPortInstance, SIGNAL(sig_serialPortDisconnected()),this, SLOT(serialPortDisconnected()));
 
     connect(ui->SerialPort1Connect, SIGNAL(clicked()),this, SLOT(buttonConnectPressed()));
     connect(this, SIGNAL(sig_connectToSerialPort(QString)),serialPortInstance, SLOT(connectToSerialPort(QString)));
@@ -27,10 +37,6 @@ customPlotProject::customPlotProject(QWidget *parent)
     connect(serialPortInstance, SIGNAL(sig_plot_new_values_y(double)), this, SLOT(plot_new_values_y(double)));
     connect(serialPortInstance, SIGNAL(sig_plot_new_values_z(double)), this, SLOT(plot_new_values_z(double)));
 
-    connect(ui->testButton, SIGNAL(clicked()), serialPortInstance, SLOT(testIt()));
-
-//    connect(ui->button_multiplexerX0, SIGNAL(clicked()), this, SLOT(setMultiplexerTo0_X()));
-//    connect(ui->button_multiplexerX1, SIGNAL(clicked()), this, SLOT(setMultiplexerTo1_X()));
     connect(ui->resolution_05V_X, SIGNAL(clicked()), this, SLOT(setResolutionX()));
     connect(ui->resolution_05V_Y, SIGNAL(clicked()), this, SLOT(setResolutionY()));
     connect(ui->resolution_05V_Z, SIGNAL(clicked()), this, SLOT(setResolutionZ()));
@@ -42,8 +48,11 @@ customPlotProject::customPlotProject(QWidget *parent)
     connect(ui->SerialPort1Disconnect, SIGNAL(clicked()), serialPortInstance, SLOT(disconnectFromSerialPort()));
     connect(ui->SerialPort1Refresh, SIGNAL(clicked()), this, SLOT(refreshCOMPorts()));
     connect(ui->button_clearPlots, SIGNAL(clicked()),this, SLOT(clearPlots()));
-    connect(ui->button_logToFile, SIGNAL(clicked()), this, SLOT(openSaveToFileDialog()));
+    connect(ui->button_openFile, SIGNAL(clicked()), this, SLOT(openSaveToFileDialog()));
 
+    connect(ui->button_closeFile, SIGNAL(clicked()),this, SLOT(closeFileForLogging()));
+
+    connect(ui->button_logToFile, SIGNAL(clicked()),this, SLOT(startLoggingToFile()));
     connect(ui->button_stopLogToFile, SIGNAL(clicked()),this, SLOT(stopLoggingToFile()));
 
 
@@ -118,16 +127,25 @@ customPlotProject::customPlotProject(QWidget *parent)
     counterHighSPS = 0;
     skipDueToDelay = false;
 
+    ui->SerialPort1Disconnect->setEnabled(false);
+    ui->button_closeFile->setEnabled(false);
+    ui->button_logToFile->setEnabled(false);
+    ui->button_stopLogToFile->setEnabled(false);
+
     serialPortThread.start();
 
-    //qDebug() << "started";
 }
 
+customPlotProject::~customPlotProject()
+{
+    delete ui;
+    serialPortThread.quit();
+    serialPortThread.wait();
+}
 
 
 void customPlotProject::buttonConnectPressed(){
     portName = ui->SerialPlot1Port->currentText();
-    //qDebug() << portName << " " << BAUD_115200 ;
     emit sig_connectToSerialPort(portName);
 }
 
@@ -173,7 +191,7 @@ void customPlotProject::plot_new_values_x(double arg_valueToPlot){
         bool resWriteData = writeDataToFile((formattedNumber + " "));
         if(resWriteData == false){
             QMessageBox::critical(nullptr, "Error", "An error has occurred while writing to a file!");
-            stopLoggingToFile();
+            closeFileForLogging();
         }
     }
 }
@@ -214,7 +232,7 @@ void customPlotProject::plot_new_values_y(double arg_valueToPlot){
         bool resWriteData = writeDataToFile((formattedNumber + " "));
         if(resWriteData == false){
             QMessageBox::critical(nullptr, "Error", "An error has occurred while writing to a file!");
-            stopLoggingToFile();
+            closeFileForLogging();
         }
     }
 }
@@ -257,14 +275,19 @@ void customPlotProject::plot_new_values_z(double arg_valueToPlot){
         bool resWriteData = writeDataToFile((formattedNumber + "\n"));
         if(resWriteData == false){
             QMessageBox::critical(nullptr, "Error", "An error has occurred while writing to a file!");
-            stopLoggingToFile();
+            closeFileForLogging();
+        }
+        valuesStoredToFile++;
+        uint8_t moduloDivider;
+        if(samplesPerSeconds == "5"){
+            moduloDivider = 10;
+        }else{
+            moduloDivider = 100;
+        }
+        if ((valuesStoredToFile % moduloDivider) ==0){
+            ui->loggingToFileText->setText("Saving to file active: " + QString::number(valuesStoredToFile));
         }
     }
-}
-
-customPlotProject::~customPlotProject()
-{
-    delete ui;
 }
 
 QVector<double> customPlotProject::createVectorForPlot_x(int numberOfValues){
@@ -441,22 +464,14 @@ void customPlotProject::openSaveToFileDialog()
     threeDotButton->setParent(dialogWindow);
     threeDotButton->show();
 
-    QPushButton *button_startLogging = new QPushButton();
-    button_startLogging->setGeometry(540, 190, 80, 40); // Set the button's position and size
-    button_startLogging->setText("Start logging");
-    button_startLogging->setParent(dialogWindow);
-    button_startLogging->show();
-
-//    savingLabel = new QLabel("Saving in progress!");
-//    savingLabel->setGeometry(10, 50, 200, 50);
-//    QFont  font;
-//    font.setPointSize(16);
-//    savingLabel->setFont(font);
-//    savingLabel->setStyleSheet("background-color: green; color: black; padding: 5px;");
-//    savingLabel->setParent(dialogWindow);
+    QPushButton *button_dialogOpenFile = new QPushButton();
+    button_dialogOpenFile->setGeometry(540, 190, 80, 40); // Set the button's position and size
+    button_dialogOpenFile->setText("Open file");
+    button_dialogOpenFile->setParent(dialogWindow);
+    button_dialogOpenFile->show();
 
     connect(threeDotButton, SIGNAL(clicked()), this, SLOT(chooseFileFromSystem()));
-    connect(button_startLogging, SIGNAL(clicked()),this, SLOT(setLoggingToFile()));
+    connect(button_dialogOpenFile, SIGNAL(clicked()),this, SLOT(openFileForLogging()));
 }
 
 void customPlotProject::chooseFileFromSystem()
@@ -465,29 +480,69 @@ void customPlotProject::chooseFileFromSystem()
     filePath->setText(selectedFileName);
 }
 
-void customPlotProject::setLoggingToFile()
+void customPlotProject::openFileForLogging()
 {
     selectedFileName = filePath->text();
     file.setFileName(selectedFileName);
     if (file.open(QIODevice::WriteOnly | QIODevice::Text)){
         fileOut.setDevice(&file);
-        loggingToFileEnabled = true;
-        ui->loggingToFileText->show();
+        fileOpened = true;
+//        loggingToFileEnabled = true;
+        //ui->loggingToFileText->show();
 
     }else{
-        loggingToFileEnabled = false;
+        //loggingToFileEnabled = false;
+        fileOpened = false;
     }
+//    QString fileHeader = createHeaderForFile();
+//    writeDataToFile(fileHeader);
+//    valuesStoredToFile = 0;
+    ui->button_openFile->setEnabled(false);
+    ui->button_closeFile->setEnabled(true);
+    ui->button_logToFile->setEnabled(true);
+    ui->button_stopLogToFile->setEnabled(true);
+    dialogWindow->close();
+}
+
+void customPlotProject::closeFileForLogging()
+{
+    if (loggingToFileEnabled==false){
+        fileOpened = false;
+        file.close();
+        ui->button_openFile->setEnabled(true);
+        ui->button_closeFile->setEnabled(false);
+        ui->button_logToFile->setEnabled(false);
+        ui->button_stopLogToFile->setEnabled(false);
+    }
+}
+
+void customPlotProject::serialPortConnected()
+{
+    ui->SerialPort1Connect->setEnabled(false);
+    ui->SerialPort1Disconnect->setEnabled(true);
+}
+
+void customPlotProject::serialPortDisconnected()
+{
+    ui->SerialPort1Connect->setEnabled(true);
+    ui->SerialPort1Disconnect->setEnabled(false);
+}
+
+void customPlotProject::startLoggingToFile()
+{
     QString fileHeader = createHeaderForFile();
     writeDataToFile(fileHeader);
-    valuesStoredToFile = 0;
-    dialogWindow->close();
+    ui->loggingToFileText->show();
+    loggingToFileEnabled = true;
+    ui->button_closeFile->setEnabled(false);
 }
 
 void customPlotProject::stopLoggingToFile()
 {
     loggingToFileEnabled = false;
-    file.close();
     ui->loggingToFileText->hide();
+    valuesStoredToFile = 0;
+    ui->button_closeFile->setEnabled(true);
 }
 
 bool customPlotProject::writeDataToFile(const QString &data){

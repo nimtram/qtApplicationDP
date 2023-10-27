@@ -101,60 +101,14 @@ void serialport::connectToSerialPort(QString portName){
     else
     {
         qDebug() << "Connected!";
+        emit sig_serialPortConnected();
+
     }
     readAll();
 }
 
 void serialport::disconnectFromSerialPort(){
+    emit sig_serialPortDisconnected();
     close();
+
 }
-
-
-void serialport::testIt(){
-/*    qDebug()<< "Parse it!!";
-    QVector<double> valuesToPlot;
-    QString stringFromUtf8 = "x2149360667,2149360687,2149360867,2149360767,2149360567\n";
-    QChar typeOfData = stringFromUtf8[0];
-    stringFromUtf8.remove(0,1);
-    stringFromUtf8.replace("\n", "");
-    QVector<uint32_t> numberVector;
-
-    double maxADCValue = pow(2, 32);
-    double voltageResolution = 5.0;
-
-    QStringList stringList = stringFromUtf8.split(",");
-    foreach(const QString &str, stringList) {
-        bool ok; // To check if the conversion was successful
-        uint32_t number = str.toUInt(&ok);
-
-        if (ok) {
-            numberVector.append(number);
-            qDebug() << number ;
-        } else {
-            qDebug() << "error in conversion of number";
-        }
-    }
-
-    for (int i = 0; i < numberVector.size(); ++i) {
-        double voltage = (static_cast<double>(numberVector[i]) *( voltageResolution/maxADCValue)) -2.5;
-        valuesToPlot.append(voltage);
-    }
-
-
-    if(typeOfData == 'x'){
-        emit sig_plot_new_values_x(valuesToPlot);
-    }
-    else if(typeOfData == 'y'){
-
-        emit sig_plot_new_values_y(valuesToPlot);
-    }
-    else if(typeOfData == 'z'){
-        emit sig_plot_new_values_z(valuesToPlot);
-    }
-    else{
-        qDebug() << "something went wrong, no letter was sent first";
-    }
-
-*/
-}
-
